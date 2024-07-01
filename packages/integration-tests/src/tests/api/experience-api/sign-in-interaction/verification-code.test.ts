@@ -1,4 +1,5 @@
 import { deleteUser } from '#src/api/admin-user.js';
+import { setEmailConnector, setSmsConnector } from '#src/helpers/connector.js';
 import { signInWithVerificationCode } from '#src/helpers/experience/index.js';
 import { enableAllVerificationCodeSignInMethods } from '#src/helpers/sign-in-experience.js';
 import { generateNewUser } from '#src/helpers/user.js';
@@ -13,6 +14,7 @@ const identifiersTypeToUserProfile = Object.freeze({
 
 devFeatureTest.describe('Sign-in with verification code happy path', () => {
   beforeAll(async () => {
+    await Promise.all([setEmailConnector(), setSmsConnector()]);
     await enableAllVerificationCodeSignInMethods();
   });
 
