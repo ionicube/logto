@@ -21,7 +21,14 @@ const getAuthorizationUri: GetAuthorizationUri = async (
   { state, redirectUri, connectorId },
   setSession
 ) => {
-  await setSession({ state, redirectUri, connectorId });
+  try {
+    await setSession({ state, redirectUri, connectorId });
+  } catch (error: unknown) {
+    // Ignore the error if the method is not implemented
+    if (!(error instanceof ConnectorError && error.code === ConnectorErrorCodes.NotImplemented)) {
+      throw error;
+    }
+  }
 
   return `http://mock.social.com/?state=${state}&redirect_uri=${redirectUri}`;
 };
@@ -39,11 +46,17 @@ const getUserInfo: GetUserInfo = async (data, getSession) => {
     throw new ConnectorError(ConnectorErrorCodes.InvalidResponse, JSON.stringify(data));
   }
 
-  const connectorSession = await getSession();
-
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  if (!connectorSession) {
-    throw new ConnectorError(ConnectorErrorCodes.AuthorizationFailed);
+  try {
+    const connectorSession = await getSession();
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!connectorSession) {
+      throw new ConnectorError(ConnectorErrorCodes.AuthorizationFailed);
+    }
+  } catch (error: unknown) {
+    // Ignore the error if the method is not implemented
+    if (!(error instanceof ConnectorError && error.code === ConnectorErrorCodes.NotImplemented)) {
+      throw error;
+    }
   }
 
   const { code, userId, ...rest } = result.data;
